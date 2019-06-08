@@ -23,19 +23,12 @@ import io.netty.handler.stream.ChunkedWriteHandler;
  *
  * @author thenk008,echosun
  */
-public class HttpServer {
-
-//	public static void main(String[] args) {
-//		HttpServer httpServer=new HttpServer();
-//
-//		httpServer.connect(1234,"123");
-//	}
-
+public class NettyHWSServer {
 
     /**
      * EventLoopGroup是一组EventLoop的抽象，每个EventLoop维护着一个Selector实例，类似单线程Reactor模式地工作着。
      *
-      */
+	 */
 	public void connect(int port,String url){
 		SystemLog.WELCOME();
 		ResConfig.get().setControl(url);

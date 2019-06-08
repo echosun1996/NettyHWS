@@ -40,9 +40,8 @@ public class Http extends SimpleChannelInboundHandler<Object> implements Request
 
 	@Override
 	protected void channelRead0(ChannelHandlerContext arg0, Object msg) throws Exception {
-		if(Config.DEGUB) {
-			SystemLog.DEBUG("channelRead0",msg.toString());
-		}
+		SystemLog.DEBUG("channelRead0",msg.toString());
+
 
 		if (msg instanceof FullHttpRequest) {
 			// 收到 HTTP 数据包后，转交给 handleHttpRequest 处理
@@ -76,16 +75,16 @@ public class Http extends SimpleChannelInboundHandler<Object> implements Request
 		//TODO 增加 WebSocket 处理逻辑
 		MyControl control = new MyControl();
 		control.webSocketController(this,ch);
-		if(Config.DEGUB){
-			SystemLog.DEBUG("WebSocket",frameString);
-		}
+
+		SystemLog.DEBUG("WebSocket",frameString);
+
 	}
 
 	private void handleHttpRequest(ChannelHandlerContext arg0, FullHttpRequest fullHttpRequest) throws Exception {
-		if(Config.DEGUB){
-			SystemLog.DEBUG("ChannelHandlerContext",arg0.toString());
-			SystemLog.DEBUG("FullHttpRequest",fullHttpRequest.toString());
-		}
+
+		SystemLog.DEBUG("ChannelHandlerContext",arg0.toString());
+		SystemLog.DEBUG("FullHttpRequest",fullHttpRequest.toString());
+
 
 		// 请求头没有 Upgrade 字段，则为一个 HTTP 请求
 		if (fullHttpRequest.headers().get("Upgrade") == null) {
