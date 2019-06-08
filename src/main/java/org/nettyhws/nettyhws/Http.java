@@ -2,6 +2,8 @@ package org.nettyhws.nettyhws;
 
 import java.io.UnsupportedEncodingException;
 
+import io.netty.handler.codec.http.*;
+import io.netty.util.CharsetUtil;
 import org.nettyhws.nettyhws.agreement.ShareMessage;
 import org.nettyhws.nettyhws.constant.Config;
 import org.nettyhws.nettyhws.constant.HttpCode;
@@ -15,16 +17,17 @@ import io.netty.buffer.Unpooled;
 import io.netty.channel.ChannelFutureListener;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.SimpleChannelInboundHandler;
-import io.netty.handler.codec.http.DefaultFullHttpResponse;
-import io.netty.handler.codec.http.FullHttpRequest;
-import io.netty.handler.codec.http.FullHttpResponse;
-import io.netty.handler.codec.http.HttpResponseStatus;
-import io.netty.handler.codec.http.HttpVersion;
 import io.netty.handler.codec.http.websocketx.*;
 
 public class Http extends SimpleChannelInboundHandler<Object> implements RequestManager {
+	// 建立 WebSocket 的端口
+	private int port;
 
-	// private RequestManager man ;
+	public Http(int port) {
+		this.port = port;
+	}
+
+// private RequestManager man ;
 
 	private WebSocketServerHandshaker handshaker;
 	@Override
@@ -71,48 +74,74 @@ public class Http extends SimpleChannelInboundHandler<Object> implements Request
 		}
 		String frameString = ((TextWebSocketFrame) frame).text();
 		//TODO 增加 WebSocket 处理逻辑
+		MyControl control = new MyControl();
+		control.webSocketController(this,ch);
 		if(Config.DEGUB){
 			SystemLog.DEBUG("WebSocket",frameString);
 		}
 	}
 
 	private void handleHttpRequest(ChannelHandlerContext arg0, FullHttpRequest fullHttpRequest) throws Exception {
-		// !fullHttpRequest.getDecoderResult().isSuccess()
-		FullHttpResponse response;
-		ShareCon share = new ShareCon();
-		MyControl control = new MyControl();
-		if (!fullHttpRequest.decoderResult().isSuccess()) {
-			//response =
-            new DefaultFullHttpResponse(HttpVersion.HTTP_1_1, HttpResponseStatus.BAD_REQUEST);
-			return;
+		if(Config.DEGUB){
+			SystemLog.DEBUG("ChannelHandlerContext",arg0.toString());
+			SystemLog.DEBUG("FullHttpRequest",fullHttpRequest.toString());
 		}
 
-		// 大于信息包最大长度
-		if (fullHttpRequest.content().readableBytes() > Config.MESSAGE_MAX) {
-			//response =
-            new DefaultFullHttpResponse(HttpVersion.HTTP_1_1, HttpResponseStatus.BAD_REQUEST);
-			System.out.println("请求体过长");
-			return;
+		// 请求头没有 Upgrade 字段，则为一个 HTTP 请求
+		if (fullHttpRequest.headers().get("Upgrade") == null) {
+			FullHttpResponse response;
+			ShareCon share = new ShareCon();
+			MyControl control = new MyControl();
+			if (!fullHttpRequest.decoderResult().isSuccess()) {
+				//response =
+				new DefaultFullHttpResponse(HttpVersion.HTTP_1_1, HttpResponseStatus.BAD_REQUEST);
+				return;
+			}
+
+			// 大于信息包最大长度
+			if (fullHttpRequest.content().readableBytes() > Config.MESSAGE_MAX) {
+				//response =
+				new DefaultFullHttpResponse(HttpVersion.HTTP_1_1, HttpResponseStatus.BAD_REQUEST);
+				System.out.println("请求体过长");
+				return;
+			}
+			ByteBuf fu;// = Unpooled.directBuffer(4096)
+			// 读取POST数据
+			fu = fullHttpRequest.content();
+			// 创建字节数组
+			byte[] body = new byte[fu.readableBytes()];
+			// 将缓存区内容读取到字节数组中
+			fu.readBytes(body);
+			String bodys = new String(body, "UTF-8");
+
+			SystemLog.INFO(bodys);
+
+			ShareMessage message = share.getShareMessage(fullHttpRequest.uri(), bodys);
+
+			// 使用反射处理消息
+			boolean bm = control.httpController(message, this, arg0);
+
+			if (!bm) {
+				response(arg0, null, HttpCode.NOT_FOUND);
+			}
 		}
-		ByteBuf fu;// = Unpooled.directBuffer(4096)
-		// 读取POST数据
-		fu = fullHttpRequest.content();
-		// 创建字节数组
-		byte[] body = new byte[fu.readableBytes()];
-		// 将缓存区内容读取到字节数组中
-		fu.readBytes(body);
-		String bodys = new String(body, "UTF-8");
 
-		SystemLog.INFO(bodys);
 
-		ShareMessage message = share.getShareMessage(fullHttpRequest.uri(), bodys);
+		// 有 Upgrade 字段，则表明为 WebSocket 握手包
+		else{
+			SystemLog.INFO("执行 WebSocket 握手");
+			WebSocketServerHandshakerFactory ws = new WebSocketServerHandshakerFactory("ws://127.0.0.1:"+port+"/websocket",
+					null, false);
+			handshaker = ws.newHandshaker(fullHttpRequest);
+			if (handshaker == null) {
+				WebSocketServerHandshakerFactory.sendUnsupportedVersionResponse(arg0.channel());
+			} else {
+				handshaker.handshake(arg0.channel(), fullHttpRequest);
+			}
 
-		// 使用反射处理消息
-		boolean bm = control.httpController(message, this, arg0);
-
-		if (!bm) {
-			response(arg0, null, HttpCode.NOT_FOUND);
 		}
+
+
 	}
 
 	@Override
@@ -138,7 +167,13 @@ public class Http extends SimpleChannelInboundHandler<Object> implements Request
 			default:
 				response = new DefaultFullHttpResponse(HttpVersion.HTTP_1_1, HttpResponseStatus.METHOD_NOT_ALLOWED);
 			}
-			channelHandlerContext.writeAndFlush(response).addListener(ChannelFutureListener.CLOSE);
+
+			if(HttpCode.WEB_SOCKET!=httpCode) {
+				channelHandlerContext.writeAndFlush(response).addListener(ChannelFutureListener.CLOSE);
+			}
+			else{
+				channelHandlerContext.channel().writeAndFlush(msg).addListener(ChannelFutureListener.CLOSE);
+			}
 		} catch (UnsupportedEncodingException e) {
 			e.printStackTrace();
 		}

@@ -47,7 +47,7 @@ public class HttpServer {
 			// 服务端启动器
 			ServerBootstrap serverBootstrap = new ServerBootstrap();
 			// 设置TCP参数
-			serverBootstrap.group(bossGroup, workerGroup).channel(NioServerSocketChannel.class).childOption(ChannelOption.TCP_NODELAY, true).childHandler(new ChildHandler());
+			serverBootstrap.group(bossGroup, workerGroup).channel(NioServerSocketChannel.class).childOption(ChannelOption.TCP_NODELAY, true).childHandler(new ChildHandler(port));
 
 			Channel channel = serverBootstrap.bind(new InetSocketAddress(port)).sync().channel();
 			SystemLog.INFO("http server start port open :" + port);
@@ -61,8 +61,12 @@ public class HttpServer {
 	}
 }
 class ChildHandler extends ChannelInitializer<SocketChannel>   {
+	private int port;
+	public ChildHandler(int port) {
+		this.port=port;
+	}
 
-    /**
+	/**
      * Channel是Netty最核心的接口，一个Channel就是一个联络Socket的通道，通过Channel，可以对Socket进行各种操作。
      * 用Netty编写网络程序的时候，主要是通过ChannelHandler来间接操纵Channel。
      *
@@ -73,7 +77,7 @@ class ChildHandler extends ChannelInitializer<SocketChannel>   {
         socketChannel.pipeline().addLast(new HttpServerCodec());
         socketChannel.pipeline().addLast(new HttpObjectAggregator(Config.MAX_CONTENT_LENGTH));
         socketChannel.pipeline().addLast(new ChunkedWriteHandler());
-        socketChannel.pipeline().addLast(new Http());
+        socketChannel.pipeline().addLast(new Http(port));
 	}
 
 }

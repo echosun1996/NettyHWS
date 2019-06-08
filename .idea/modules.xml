@@ -3,6 +3,7 @@
   <component name="ProjectModuleManager">
     <modules>
       <module fileurl="file://$PROJECT_DIR$/chainMarket.iml" filepath="$PROJECT_DIR$/chainMarket.iml" />
+      <module fileurl="file://$PROJECT_DIR$/nettyHWS.iml" filepath="$PROJECT_DIR$/nettyHWS.iml" />
     </modules>
   </component>
 </project>
