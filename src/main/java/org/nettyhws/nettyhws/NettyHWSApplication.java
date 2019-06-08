@@ -1,14 +1,13 @@
 package org.nettyhws.nettyhws;
 
-import com.sun.net.httpserver.HttpsServer;
 import org.nettyhws.nettyhws.annotations.HttpMapping;
 import org.nettyhws.nettyhws.constant.Config;
+import org.nettyhws.nettyhws.def.ResConfig;
 import org.nettyhws.nettyhws.log.SystemLog;
 import org.nettyhws.nettyhws.tools.PackageUtil;
 
 import java.lang.annotation.Annotation;
 import java.util.HashMap;
-import java.util.Map;
 import java.util.Set;
 
 /**
@@ -18,7 +17,7 @@ import java.util.Set;
  */
 public class NettyHWSApplication {
     // Controller 路径，启动服务后将在这个路径中通过注解判断是否注册到服务中
-    Map<String, Class> urlToClassMap;
+
     NettyHWSServer httpsServer;
     int port;
 
@@ -35,7 +34,7 @@ public class NettyHWSApplication {
      */
     private void startServer(int port){
         httpsServer=new NettyHWSServer();
-//        httpsServer.connect(port,);
+        httpsServer.connect(port);
 //        this.port=port;
 //        for (String key : urlToClassMap.keySet()) {
 //            System.out.println("key= "+ key + " and value= " + urlToClassMap.get(key));
@@ -51,7 +50,7 @@ public class NettyHWSApplication {
      * @param packageName 包名
      */
     private void inserClassFromPackageName(String packageName){
-        urlToClassMap= new HashMap<>();
+        HashMap<String,Class> urlToClassMap= new HashMap<>();
         try {
             Set<Class<?>> classSet =PackageUtil.getClasses(packageName);
             if(classSet.size()==0){
@@ -75,20 +74,41 @@ public class NettyHWSApplication {
                     continue;
                 }
                 HttpMapping httpMapping= (HttpMapping) clazz.getAnnotation(HttpMapping.class);
-                if(urlToClassMap.get(httpMapping.value())!=null){
+                String uri=uriHandle(httpMapping.value());
+
+                if(urlToClassMap.get(uri)!=null){
                     SystemLog.ERROR("已有绑定 "+urlToClassMap.get(httpMapping.value()).getName());
                     SystemLog.ERROR("欲绑定 "+clazz.getName()+" 出现冲突！");
                     SystemLog.FATAL("请检查是否出现同一路径被重复绑定。");
                 }
                 SystemLog.INFO("新增绑定:"+clazz.getName());
-                urlToClassMap.put(httpMapping.value(),clazz);
+                urlToClassMap.put(uri,clazz);
             }
+            ResConfig.get().setController(urlToClassMap);
 
         } catch (ClassCastException e){
             SystemLog.FATAL(packageName+" 该类无法被识别");
         }
     }
 
+    /**
+     * 处理注解中的 URI
+     * @param oriURL
+     * @return
+     */
+    String uriHandle(String oriURL){
+        if(oriURL.charAt(oriURL.length()-1)=='/'){
+            SystemLog.ERROR("发现不建议的路径："+oriURL+" 不建议以斜线结束。");
+            int i=oriURL.length()-1;
+            while(oriURL.charAt(oriURL.length()-1)=='/'){
+                oriURL = oriURL.substring(0,oriURL.length() - 1);
+            }
+
+            SystemLog.ERROR("已修正为："+oriURL);
+        }
+
+        return oriURL;
+    }
 
 
 

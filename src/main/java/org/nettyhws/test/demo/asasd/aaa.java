@@ -8,7 +8,7 @@ import org.nettyhws.nettyhws.i.Myboss;
 
 import java.util.Map;
 
-@HttpMapping("/hasNo")
+@HttpMapping("/hasNo/")
 public class aaa implements Myboss {
     private Http http;
     private ChannelHandlerContext channelHandlerContext;

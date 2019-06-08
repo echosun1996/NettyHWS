@@ -4,7 +4,10 @@ import org.nettyhws.nettyhws.agreement.ShareMessage;
 
 import io.netty.channel.ChannelHandlerContext;
 import org.nettyhws.nettyhws.constant.HttpCode;
+import org.nettyhws.nettyhws.def.ResConfig;
 import org.nettyhws.nettyhws.log.SystemLog;
+
+import java.util.Map;
 
 /**
  * @author thenk008,echosun
@@ -15,10 +18,16 @@ public class MyControl extends MySon {
 		Class<?> c;
 		boolean isRight = true;
 		try {
-			c = Class.forName(share.getUri());
+			Map<String, Class> my=ResConfig.get().getController();
+			if(my.get(share.getUri())==null){
+				SystemLog.INFO("Not Found");
+				return false;
+			}
+
+			c = my.get(share.getUri());
 			setMyboss(c);
 			body(share.getBody(),share.getParams(), http, ch);
-		} catch (ClassNotFoundException e) {
+		} catch (Exception e) {
 			isRight = false;
 		}
 		return isRight;
