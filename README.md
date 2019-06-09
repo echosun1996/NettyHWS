@@ -55,7 +55,22 @@ public class TestMain {
 
 
 ## 使用方法
-
+- 添加maven
+```xml
+<dependencies>
+    <dependency>
+      <groupId>org.nettyhws</groupId>
+      <artifactId>nettyhws</artifactId>
+      <version>1.1.5</version><!--对应NettyHWS版本-->
+    </dependency>
+    <dependency>
+      <groupId>io.netty</groupId>
+      <artifactId>netty-all</artifactId>
+      <version>4.1.13.Final</version>
+      <scope>compile</scope>
+    </dependency>
+</dependencies>
+```
 - 创建一个Server  
 
 ```java
