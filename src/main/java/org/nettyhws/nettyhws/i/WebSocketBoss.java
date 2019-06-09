@@ -1,23 +1,20 @@
 package org.nettyhws.nettyhws.i;
 
 import io.netty.channel.ChannelHandlerContext;
-import org.nettyhws.nettyhws.Http;
+import org.nettyhws.nettyhws.ChannelInboundHandler;
 
-import java.util.Map;
-
-public  interface WebSocketBoss {
+/**
+ * WebSocket 接口。
+ *
+ * @author echosun
+ */
+public interface WebSocketBoss {
     /**
-     * 具体实现类
+     * 重写该方法，完成对传入参数的处理。
      *
-     * @param message Map<Object,Object>
+     * @param channelInboundHandler ChannelInboundHandler
+     * @param channelHandlerContext ChannelHandlerContext
+     * @param message WebSocket 消息
      */
-    void body(String message);
-
-    /**
-     * 初始化数据
-     *
-     * @param web Http
-     * @param ch  ChannelHandlerContext
-     */
-    void head(Http web, ChannelHandlerContext ch);
+    void webSocketReceiver(ChannelInboundHandler channelInboundHandler, ChannelHandlerContext channelHandlerContext,String message);
 }

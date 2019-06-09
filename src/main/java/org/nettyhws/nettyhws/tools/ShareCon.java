@@ -3,19 +3,20 @@ package org.nettyhws.nettyhws.tools;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.nettyhws.nettyhws.agreement.ShareMessage;
-import org.nettyhws.nettyhws.def.ResConfig;
+import org.nettyhws.nettyhws.agreement.HttpMessage;
 import org.nettyhws.nettyhws.log.SystemLog;
 
 /**
+ * 用于处理 HTTP 请求，提取其中的参数。
+ *
  * @author thenk008,echosun
  */
 public class ShareCon {
-	public ShareMessage getShareMessage(String uri, String bodyMessage) {
+	public HttpMessage getShareMessage(String uri, String bodyMessage) {
 		Map<Object, Object> map = new HashMap<>();
-		String params;// get 参数
-
-		if (uri.indexOf("?") > 0) {// 存在GET参数
+		String params;
+		// 存在GET参数
+		if (uri.indexOf("?") > 0) {
 			params = uri.split("\\?")[1];
 			uri = uri.split("\\?")[0];
 			String[] names = params.split("&");
@@ -24,26 +25,8 @@ public class ShareCon {
 				map.put(nameAndValue[0], nameAndValue[1]);
 			}
 		}
-		// 将每一个/后面的第一个字母大写
-		// String[] urs = uri.split("/");
-//		SystemLog.DEBUG("uri",uri);
-//		byte[] bc = uri.getBytes();
-//		int k = 0;
-//		for (int i = 0; i < bc.length; i++) {
-//			if (bc[i] == 47) {
-//				bc[i] = 46;
-//				k = i;
-//			}
-//		}
-//		byte br = bc[k + 1];
-//		if (br > 96) {
-//			bc[k + 1] = (byte) (br - 32);
-//		}
-
-		//uri = new String(bc).replace(",", "/");//ResConfig.get().getHttpController() + new String(bc);// uriuri.replace("/", ".")
 		SystemLog.DEBUG("URI",uri);
-		// System.out.println("end uri==" + uri);
-		ShareMessage share = new ShareMessage();
+		HttpMessage share = new HttpMessage();
 		share.setBody(bodyMessage);
 		share.setUri(uri);
 		share.setParams(map);

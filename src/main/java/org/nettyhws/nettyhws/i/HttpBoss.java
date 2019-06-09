@@ -1,28 +1,22 @@
 package org.nettyhws.nettyhws.i;
 
 import java.util.Map;
-
-import org.nettyhws.nettyhws.Http;
-
+import org.nettyhws.nettyhws.ChannelInboundHandler;
 import io.netty.channel.ChannelHandlerContext;
 
 /**
- * 基于HTTP通信的接口
+ * HTTP 接口。
  *
  * @author thenk008,echosun
  */
 public interface HttpBoss {
     /**
-     * 具体实现类
-     * @param body String
-     * @param param Map<Object,Object>
+     * 重写该方法，完成对传入参数的处理。
+     *
+     * @param channelInboundHandler ChannelInboundHandler
+     * @param channelHandlerContext ChannelHandlerContext
+     * @param body Post 请求内容
+     * @param param Get 请求参数
      */
-    void body(String body,Map<Object,Object> param);
-
-    /**
-     * 初始化数据
-     * @param web Http
-     * @param ch ChannelHandlerContext
-     */
-    void head(Http web ,ChannelHandlerContext ch);
+    void httpReceiver(ChannelInboundHandler channelInboundHandler , ChannelHandlerContext channelHandlerContext,String body,Map<Object,Object> param);
 }

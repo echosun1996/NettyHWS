@@ -1,4 +1,4 @@
 package org.nettyhws.test.demo;
 
-public class noController {
+public class Nothing {
 }
