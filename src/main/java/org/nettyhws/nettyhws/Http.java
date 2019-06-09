@@ -3,17 +3,15 @@ package org.nettyhws.nettyhws;
 import java.io.UnsupportedEncodingException;
 
 import io.netty.handler.codec.http.*;
-import io.netty.util.CharsetUtil;
+import io.netty.util.AttributeKey;
 import org.nettyhws.nettyhws.agreement.ShareMessage;
 import org.nettyhws.nettyhws.constant.Config;
 import org.nettyhws.nettyhws.constant.HttpCode;
 import org.nettyhws.nettyhws.i.RequestManager;
 import org.nettyhws.nettyhws.log.SystemLog;
 import org.nettyhws.nettyhws.tools.ShareCon;
-import org.nettyhws.nettyhws.tools.ShareCon;
 
 import io.netty.buffer.ByteBuf;
-import io.netty.buffer.Unpooled;
 import io.netty.channel.ChannelFutureListener;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.SimpleChannelInboundHandler;
@@ -49,6 +47,8 @@ public class Http extends SimpleChannelInboundHandler<Object> implements Request
 			handleHttpRequest(arg0, (FullHttpRequest) msg);
 
 		} else if (msg instanceof WebSocketFrame) {
+
+
 			// 收到 WebSocket 数据包后，转交给 handleWebSocketFrame 处理
 			WebSocketFrame webSocketFrame = (WebSocketFrame) msg;
 			if(webSocketFrame.content().readableBytes()<Config.MAX_CONTENT_LENGTH){
@@ -73,8 +73,22 @@ public class Http extends SimpleChannelInboundHandler<Object> implements Request
 		}
 		String frameString = ((TextWebSocketFrame) frame).text();
 		//TODO 增加 WebSocket 处理逻辑
-		MyControl control = new MyControl();
-		control.webSocketController(this,ch);
+
+		String type=ch.channel().attr(AttributeKey.valueOf("type")).get().toString();
+		SystemLog.DEBUG("WebSocket type",type);
+
+//		if("anzhuo".equals()){
+//			//handleWebSocketFrame(ch, frame);
+//			System.out.println(1111);
+//		}else {
+//			System.out.println(2323);
+//			//handleWebSocketFrame(ch, frame);
+//		}
+
+
+
+		WebSocketControl control = new WebSocketControl();
+		control.webSocketController(type,this,ch,frameString);
 
 		SystemLog.DEBUG("WebSocket",frameString);
 
@@ -90,7 +104,7 @@ public class Http extends SimpleChannelInboundHandler<Object> implements Request
 		if (fullHttpRequest.headers().get("Upgrade") == null) {
 			FullHttpResponse response;
 			ShareCon share = new ShareCon();
-			MyControl control = new MyControl();
+			HttpControl control = new HttpControl();
 			if (!fullHttpRequest.decoderResult().isSuccess()) {
 				//response =
 				new DefaultFullHttpResponse(HttpVersion.HTTP_1_1, HttpResponseStatus.BAD_REQUEST);
@@ -128,7 +142,17 @@ public class Http extends SimpleChannelInboundHandler<Object> implements Request
 
 		// 有 Upgrade 字段，则表明为 WebSocket 握手包
 		else{
+
+			HttpMethod method=fullHttpRequest.method();
+			String uri=fullHttpRequest.uri();
+
+			if(method==HttpMethod.GET){
+				SystemLog.INFO("检测到 WebSocket 请求，路径为: "+uri);
+				arg0.channel().attr(AttributeKey.valueOf("type")).set(uri);
+			}
+
 			SystemLog.INFO("执行 WebSocket 握手");
+			//这里填写什么地址都无所谓，WS协议消息的接收不受这里控制
 			WebSocketServerHandshakerFactory ws = new WebSocketServerHandshakerFactory("ws://127.0.0.1:"+port+"/websocket",
 					null, false);
 			handshaker = ws.newHandshaker(fullHttpRequest);
@@ -171,7 +195,7 @@ public class Http extends SimpleChannelInboundHandler<Object> implements Request
 				channelHandlerContext.writeAndFlush(response).addListener(ChannelFutureListener.CLOSE);
 			}
 			else{
-				channelHandlerContext.channel().writeAndFlush(msg).addListener(ChannelFutureListener.CLOSE);
+					channelHandlerContext.channel().writeAndFlush(new TextWebSocketFrame(msg));//.addListener(ChannelFutureListener.CLOSE);
 			}
 		} catch (UnsupportedEncodingException e) {
 			e.printStackTrace();

@@ -1,6 +1,7 @@
 package org.nettyhws.nettyhws;
 
 import org.nettyhws.nettyhws.annotations.HttpMapping;
+import org.nettyhws.nettyhws.annotations.WebSocketMapping;
 import org.nettyhws.nettyhws.constant.Config;
 import org.nettyhws.nettyhws.def.ResConfig;
 import org.nettyhws.nettyhws.log.SystemLog;
@@ -50,7 +51,8 @@ public class NettyHWSApplication {
      * @param packageName 包名
      */
     private void inserClassFromPackageName(String packageName){
-        HashMap<String,Class> urlToClassMap= new HashMap<>();
+        HashMap<String,Class> httpClassMap= new HashMap<>();
+        HashMap<String,Class> webSocketClassMap= new HashMap<>();
         try {
             Set<Class<?>> classSet =PackageUtil.getClasses(packageName);
             if(classSet.size()==0){
@@ -59,6 +61,8 @@ public class NettyHWSApplication {
 
             for (Class clazz : classSet) {
                 boolean isNettyHWSController=false;
+                String annotationType = null;
+
                 Annotation[] httpMappings = clazz.getAnnotations();
                 for(Annotation annotation:httpMappings) {
 
@@ -67,24 +71,44 @@ public class NettyHWSApplication {
                     for(int i=0;i<Config.ANNOTATION_NAME.length;i++){
                         if(annotation.toString().indexOf(Config.ANNOTATION_NAME[i])==0){
                             isNettyHWSController=true;
+                            annotationType=Config.ANNOTATION_NAME[i];
+                            break;
                         }
                     }
                 }
                 if(!isNettyHWSController){
                     continue;
                 }
-                HttpMapping httpMapping= (HttpMapping) clazz.getAnnotation(HttpMapping.class);
-                String uri=uriHandle(httpMapping.value());
 
-                if(urlToClassMap.get(uri)!=null){
-                    SystemLog.ERROR("已有绑定 "+urlToClassMap.get(httpMapping.value()).getName());
-                    SystemLog.ERROR("欲绑定 "+clazz.getName()+" 出现冲突！");
-                    SystemLog.FATAL("请检查是否出现同一路径被重复绑定。");
+                if(annotationType.equals(Config.HTTP_MAPPING)){
+                    HttpMapping httpMapping= (HttpMapping) clazz.getAnnotation(HttpMapping.class);
+                    String uri=uriHandle(httpMapping.value());
+                    if(httpClassMap.get(uri)!=null){
+                        SystemLog.ERROR("已有 HTTP 绑定 "+httpClassMap.get(httpMapping.value()).getName());
+                        SystemLog.ERROR("欲绑定 "+clazz.getName()+" 出现冲突！");
+                        SystemLog.FATAL("请检查是否出现同一路径被重复绑定。");
+                    }
+                    SystemLog.INFO("新增 HTTP 绑定:"+clazz.getName()+" 绑定到路径:"+uri);
+                    httpClassMap.put(uri,clazz);
+                    
                 }
-                SystemLog.INFO("新增绑定:"+clazz.getName());
-                urlToClassMap.put(uri,clazz);
+                else if (annotationType.equals(Config.WEBSOCKET_MAPPING)){
+                    WebSocketMapping webSocketMapping= (WebSocketMapping) clazz.getAnnotation(WebSocketMapping.class);
+                    String uri=uriHandle(webSocketMapping.value());
+                    if(webSocketClassMap.get(uri)!=null){
+                        SystemLog.ERROR("已有 WebSocket 绑定 "+webSocketClassMap.get(webSocketMapping.value()).getName());
+                        SystemLog.ERROR("欲绑定 "+clazz.getName()+" 出现冲突！");
+                        SystemLog.FATAL("请检查是否出现同一路径被重复绑定。");
+                    }
+                    SystemLog.INFO("新增 WebSocket 绑定:"+clazz.getName()+" 绑定到路径:"+uri);
+                    webSocketClassMap.put(uri,clazz);
+                }
+
+
+
             }
-            ResConfig.get().setController(urlToClassMap);
+            ResConfig.get().setHttpController(httpClassMap);
+            ResConfig.get().setWebSocketController(webSocketClassMap);
 
         } catch (ClassCastException e){
             SystemLog.FATAL(packageName+" 该类无法被识别");

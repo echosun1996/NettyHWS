@@ -9,22 +9,22 @@ import io.netty.channel.ChannelHandlerContext;
 /**
  * @author thenk008,echosun
  */
-public abstract class MySon {
-	private  Class<?> myboss;
+public abstract class HttpSon {
+	private  Class<?> httpBoss;
 
-	public Class<?> getMyboss() {
-		return myboss;
+	public Class<?> getHttpBoss() {
+		return httpBoss;
 	}
 
-	void setMyboss(Class<?> mybos) {
-		myboss = mybos;
+	void setHttpBoss(Class<?> httpBoss) {
+		this.httpBoss = httpBoss;
 	}
 
 	void body(String body, Map<Object, Object> map, Http web, ChannelHandlerContext ch) {
 		try {
-			Method me = myboss.getMethod("body", String.class, Map.class);
-			Method you = myboss.getMethod("head", Http.class, ChannelHandlerContext.class);
-			Object obj = myboss.newInstance();
+			Method me = httpBoss.getMethod("body", String.class, Map.class);
+			Method you = httpBoss.getMethod("head", Http.class, ChannelHandlerContext.class);
+			Object obj = httpBoss.newInstance();
 			you.invoke(obj, web, ch);
 			me.invoke(obj, body, map);
 		} catch (NoSuchMethodException | SecurityException | InstantiationException | IllegalAccessException

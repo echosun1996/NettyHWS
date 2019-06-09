@@ -11,7 +11,7 @@ import io.netty.channel.ChannelHandlerContext;
  *
  * @author thenk008,echosun
  */
-public interface Myboss {
+public interface HttpBoss {
     /**
      * 具体实现类
      * @param body String

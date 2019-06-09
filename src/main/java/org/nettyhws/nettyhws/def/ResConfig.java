@@ -9,26 +9,28 @@ import java.util.Map;
  */
 public class ResConfig {
 	private static final ResConfig CONFIG = new ResConfig();
-	private static Map<String, Class> urlToClassMap;
+	private static Map<String, Class> httpClassMap;
+	private static Map<String, Class> webSocketClassMap;
 
 	private ResConfig() {
 	}
 
-	public Map<String, Class> getController() {
-		return urlToClassMap;
+	public Map<String, Class> getHttpController() {
+		return httpClassMap;
 	}
 
-	public void setController(Map<String, Class> urlToClassMap) {
-		ResConfig.urlToClassMap = urlToClassMap;
+	public void setWebSocketController(Map<String, Class> webSocketClassMap) {
+		ResConfig.webSocketClassMap = webSocketClassMap;
 	}
 
-//	public void setController(String url) {
-//		control = url;
-//	}
+	public Map<String, Class> getWebSocketController() {
+		return webSocketClassMap;
+	}
 
-//	public String getController() {
-//		return control;
-//	}
+	public void setHttpController(Map<String, Class> httpClassMap) {
+		ResConfig.httpClassMap = httpClassMap;
+	}
+
 
 	public static ResConfig get() {
 		return CONFIG;

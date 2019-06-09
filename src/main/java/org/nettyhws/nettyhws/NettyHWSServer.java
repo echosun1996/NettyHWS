@@ -31,7 +31,7 @@ public class NettyHWSServer {
 	 */
 	public void connect(int port){
 //		SystemLog.WELCOME();
-//		ResConfig.get().setController(url);
+//		ResConfig.get().setHttpController(url);
         // 对应mainReactor：接受新连接线程，主要负责创建新连接
 		EventLoopGroup bossGroup = new NioEventLoopGroup();
 		// 对应subReactor：负责读取数据的线程，主要用于读取数据以及业务逻辑处理

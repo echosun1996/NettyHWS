@@ -40,7 +40,7 @@ public class ShareCon {
 //			bc[k + 1] = (byte) (br - 32);
 //		}
 
-		//uri = new String(bc).replace(",", "/");//ResConfig.get().getController() + new String(bc);// uriuri.replace("/", ".")
+		//uri = new String(bc).replace(",", "/");//ResConfig.get().getHttpController() + new String(bc);// uriuri.replace("/", ".")
 		SystemLog.DEBUG("URI",uri);
 		// System.out.println("end uri==" + uri);
 		ShareMessage share = new ShareMessage();
