@@ -2,7 +2,7 @@
 <project version="4">
   <component name="ProjectModuleManager">
     <modules>
-      <module fileurl="file://$PROJECT_DIR$/chainMarket.iml" filepath="$PROJECT_DIR$/chainMarket.iml" />
+      <module fileurl="file://$PROJECT_DIR$/NettyHWS.iml" filepath="$PROJECT_DIR$/NettyHWS.iml" />
       <module fileurl="file://$PROJECT_DIR$/nettyHWS.iml" filepath="$PROJECT_DIR$/nettyHWS.iml" />
     </modules>
   </component>
