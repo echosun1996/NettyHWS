@@ -59,7 +59,7 @@ public class TestMain {
 ```xml
 <dependencies>
     <dependency>
-      <groupId>org.nettyhws</groupId>
+      <groupId>com.github.echosun1996</groupId>
       <artifactId>nettyhws</artifactId>
       <version>1.1.5</version><!--对应NettyHWS版本-->
     </dependency>

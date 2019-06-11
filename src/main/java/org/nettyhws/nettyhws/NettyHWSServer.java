@@ -24,8 +24,10 @@ import io.netty.handler.stream.ChunkedWriteHandler;
  * @author thenk008,echosun
  */
 public class NettyHWSServer {
-    /**
-     * EventLoopGroup是一组EventLoop的抽象，每个EventLoop维护着一个Selector实例，类似单线程Reactor模式地工作着。
+	/**
+	 * EventLoopGroup是一组EventLoop的抽象，每个EventLoop维护着一个Selector实例，类似单线程Reactor模式地工作着。
+	 *
+	 * @param port 初始化端口号。
 	 */
 	public void connect(int port){
         // 对应mainReactor：接受新连接线程，主要负责创建新连接。
